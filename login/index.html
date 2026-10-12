@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Quest — Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../game/effects.css">
+</head>
+<body>
+<div class="container">
+
+    <header>
+        <a class="logo" href="#" aria-label="SQL Quest home">SQL QUEST</a>
+        <p class="header-note">ACCOUNT ACCESS</p>
+    </header>
+
+    <main class="landing" id="authScreen">
+        <section class="welcome" aria-labelledby="welcomeTitle">
+            <p class="welcome-kicker"><span></span> ACCOUNT ACCESS</p>
+            <h1 id="welcomeTitle">Your SQL journey starts <span>here.</span></h1>
+            <p class="welcome-copy">Sign in or create an account to get started.</p>
+
+        </section>
+
+        <section class="auth-screen" aria-label="Account access">
+            <div class="auth-container">
+                <div class="auth-mark" aria-hidden="true">
+                    <span class="auth-mark-icon">SQL</span>
+                    <span class="auth-mark-label">SECURE ACCOUNT</span>
+                </div>
+                <h2 class="auth-title" id="authTitle">Welcome</h2>
+                <p class="auth-subtitle" id="authSubtitle">Log in to continue your quest.</p>
+                <div class="google-signin" id="googleSignInButton">
+                    <button class="google-signin-fallback" type="button" onclick="startGoogleSignIn()" aria-label="Continue with Google">
+                        <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+                            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" transform="translate(0 4)"/>
+                            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.76 7.18l7.73 6C44.42 38.06 46.98 31.93 46.98 24.55z"/>
+                            <path fill="#FBBC05" d="M10.53 28.59a14.4 14.4 0 0 1 0-9.18l-7.98-6.19a23.9 23.9 0 0 0 0 21.56l7.98-6.19z"/>
+                            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.14 1.44-4.89 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                        </svg>
+                        <span>Continue with Google</span>
+                    </button>
+                </div>
+                <div class="auth-divider" aria-hidden="true"><span>or use email and password</span></div>
+                <div class="auth-error" id="googleError" role="alert" style="display:none;"></div>
+
+                <!-- Login Form -->
+                <div class="auth-form" id="loginForm">
+                    <div class="auth-error" id="loginError" style="display:none;"></div>
+                    <div class="form-group">
+                        <label for="loginEmail">Email address</label>
+                        <input type="email" id="loginEmail" placeholder="you@example.com" aria-label="Email address" autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <div class="password-field">
+                            <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password">
+                            <button class="password-reveal" type="button" data-password-target="loginPassword" aria-label="Hold to show password" title="Hold to show password">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"></path>
+                                    <circle cx="12" cy="12" r="2.7"></circle>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button id="loginBtn" class="btn btn-primary" onclick="login()">Login</button>
+                </div>
+
+                <!-- Register Form -->
+                <div class="auth-form" id="registerForm" style="display:none;">
+                    <div class="auth-error" id="registerError" style="display:none;"></div>
+                    <p class="auth-status" id="registerStatus" role="status" style="display:none;"></p>
+                    <div class="form-group">
+                        <label for="registerUsername">Username</label>
+                        <input type="text" id="registerUsername" placeholder="Choose a username" aria-label="Username" autocomplete="username" maxlength="20">
+                        <span class="field-hint">3–20 letters, numbers, or underscores</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerEmail">Email address</label>
+                        <input type="email" id="registerEmail" placeholder="you@example.com" aria-label="Email address" autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">Password</label>
+                        <div class="password-field">
+                            <input type="password" id="registerPassword" placeholder="Create a password" autocomplete="new-password">
+                            <button class="password-reveal" type="button" data-password-target="registerPassword" aria-label="Hold to show password" title="Hold to show password">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"></path>
+                                    <circle cx="12" cy="12" r="2.7"></circle>
+                                </svg>
+                            </button>
+                        </div>
+                        <span class="field-hint">At least 8 characters</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerConfirmPassword">Confirm password</label>
+                        <div class="password-field">
+                            <input type="password" id="registerConfirmPassword" placeholder="Enter your password again" autocomplete="new-password">
+                            <button class="password-reveal" type="button" data-password-target="registerConfirmPassword" aria-label="Hold to show password" title="Hold to show password">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"></path>
+                                    <circle cx="12" cy="12" r="2.7"></circle>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button id="registerBtn" class="btn btn-primary" onclick="register()">Register</button>
+                </div>
+
+                <button id="guestBtn" class="btn btn-primary" type="button" onclick="playAsGuest()">Play as Guest</button>
+                <p class="auth-status" id="guestStatus" role="status" style="display:none;">You’re playing as a guest. Your progress and points won’t be saved permanently.</p>
+
+                <p class="auth-switch"><span id="authSwitchPrompt">Don't have an account?</span> <button class="auth-switch-link" id="authSwitchButton" type="button" onclick="toggleAuthMode()">Register</button></p>
+            </div>
+        </section>
+    </main>
+
+</div>
+
+<!-- Load order: Supabase SDK → app configuration → auth helpers → login logic -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared/config.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="script.js"></script>
+<script src="../game/effects.js"></script>
+</body>
+</html>

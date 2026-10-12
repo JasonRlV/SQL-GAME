@@ -1,0 +1,13 @@
+{
+  "name": "sql-quest",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SQL Quest game and authenticated Groq/Gemini chat service",
+  "scripts": {
+    "start": "node backend/server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

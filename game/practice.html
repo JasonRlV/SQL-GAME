@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#090a18">
+    <title>SQL Quest — Practice SQL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="practice.css">
+    <link rel="stylesheet" href="game-chat.css">
+    <link rel="stylesheet" href="effects.css">
+</head>
+<body>
+<aside class="ai-chat is-closed" id="aiChatPanel" aria-label="AI SQL assistant" aria-hidden="true">
+    <div class="chat-resizer" id="chatResizer" role="separator" tabindex="0" aria-label="Resize SQL assistant panel" aria-orientation="vertical" aria-valuemin="280" aria-valuemax="680" aria-valuenow="420"></div>
+    <div class="ai-chat-header">
+        <span class="chat-avatar" aria-hidden="true">✦</span>
+        <div class="chat-heading">
+            <h2>SQL Assistant</h2>
+            <span>Ask questions about SQL</span>
+        </div>
+        <div class="chat-header-actions">
+            <span class="chat-status" id="chatStatus" aria-live="polite">Groq selected</span>
+            <button class="chat-clear" id="clearChatButton" type="button" disabled>Clear chat</button>
+        </div>
+        <button class="chat-close" id="chatCloseButton" type="button" aria-label="Close SQL assistant">
+            <span aria-hidden="true">×</span>
+        </button>
+    </div>
+    <div class="ai-chat-content" id="chatContent">
+        <div class="chat-intro">
+            <span class="chat-intro-icon" aria-hidden="true">✦</span>
+            <p>Ask questions about SQL while you practice. Choose Groq or Gemini, and the assistant can help explain SQL concepts.</p>
+        </div>
+        <div class="chat-messages" id="chatMessages" role="log" aria-live="polite" aria-relevant="additions"></div>
+        <form class="chat-form" id="chatForm">
+            <label class="chat-model-label" for="chatModel">Model</label>
+            <select class="chat-model" id="chatModel" name="model" disabled>
+                <option value="groq">Groq (default)</option>
+                <option value="gemini">Gemini</option>
+            </select>
+            <div class="chat-composer">
+                <label class="visually-hidden" for="chatMessage">Message the SQL assistant</label>
+                <textarea id="chatMessage" rows="2" maxlength="3000" placeholder="Ask an SQL question…" disabled></textarea>
+                <button class="chat-send" id="chatSend" type="submit" disabled aria-label="Send message">↑</button>
+            </div>
+        </form>
+        <p class="chat-note" id="chatNote" role="status" aria-live="polite">Sign in to start chatting. Choose Groq or Gemini at any time.</p>
+    </div>
+</aside>
+<main class="practice-shell">
+    <header class="practice-topbar">
+        <a class="brand" href="../dashboard/dashboard.html" data-practice-exit>SQL QUEST</a>
+        <div class="game-header-actions">
+            <button class="back-link" id="viewPracticeHistoryButton" type="button" aria-haspopup="dialog" aria-controls="practiceHistoryDialog">▤ View History</button>
+            <button class="back-link chat-toggle" id="chatToggle" type="button" aria-expanded="false" aria-controls="aiChatPanel">💬 Chat</button>
+            <a class="back-link" href="../dashboard/dashboard.html" data-practice-exit>← Dashboard</a>
+        </div>
+    </header>
+
+    <section class="practice-intro">
+        <p class="eyebrow">NO SCORE · JUST PRACTICE</p>
+        <h1>Practice SQL</h1>
+        <p>Choose any SQL topic for a custom exercise. Explore its tables, write a query, and use five free progressive hints. Practice does not change your points or game score.</p>
+    </section>
+
+    <form class="topic-form" id="topicForm">
+        <label for="topicInput">What would you like to practice?</label>
+        <div class="topic-controls">
+            <input id="topicInput" name="topic" maxlength="120" required placeholder="For example: LEFT JOINs, GROUP BY, subqueries">
+            <button class="button button-primary" id="generateButton" type="submit">Generate exercise</button>
+        </div>
+    </form>
+
+    <p class="practice-status" id="practiceStatus" role="status" aria-live="polite" hidden></p>
+    <section class="loading-panel" id="loadingPanel" aria-live="polite" hidden>
+        <span class="spinner" aria-hidden="true"></span>
+        <span>Preparing your question, tables, and sample data…</span>
+    </section>
+
+    <section class="exercise" id="exercisePanel" aria-labelledby="exerciseTitle" hidden>
+        <div class="exercise-heading">
+            <div>
+                <p class="eyebrow" id="topicFocus"></p>
+                <h2 id="exerciseTitle"></h2>
+            </div>
+            <span class="practice-badge">PRACTICE</span>
+        </div>
+        <p class="question-text" id="questionText"></p>
+
+        <section class="tables-section" aria-labelledby="tablesHeading">
+            <h3 id="tablesHeading">Tables &amp; sample data</h3>
+            <div class="table-list" id="tableList"></div>
+        </section>
+
+        <form id="answerForm" class="answer-form">
+            <label for="sqlAnswer">Your SQL query</label>
+            <textarea id="sqlAnswer" spellcheck="false" maxlength="4000" rows="8" placeholder="SELECT …"></textarea>
+            <div class="answer-actions">
+                <button class="button button-primary" id="submitButton" type="submit">Check answer</button>
+                <button class="button button-secondary" id="nextHintButton" type="button">Get a hint (5 left)</button>
+            </div>
+        </form>
+
+        <section class="hint-panel" id="hintPanel" aria-label="Practice hints" hidden>
+            <div class="hint-heading">
+                <h3>Hint <span id="hintPosition"></span></h3>
+                <div class="hint-navigation">
+                    <button class="button button-small" id="previousHintButton" type="button">Previous</button>
+                    <button class="button button-small" id="followingHintButton" type="button">Next</button>
+                </div>
+            </div>
+            <p id="hintText"></p>
+        </section>
+
+        <section class="answer-feedback" id="answerFeedback" role="status" aria-live="polite" hidden>
+            <h3 id="feedbackTitle"></h3>
+            <p id="feedbackText"></p>
+            <p id="explanationText" class="explanation" hidden></p>
+            <div class="reference-panel" id="referencePanel" hidden>
+                <h4>Reference solution</h4>
+                <pre id="referenceSolution"></pre>
+                <h4>Expected result</h4>
+                <div id="referenceOutput" class="table-scroll"></div>
+            </div>
+        </section>
+        <button class="button button-primary next-question" id="nextQuestionButton" type="button" hidden>Next question</button>
+    </section>
+</main>
+<dialog class="practice-history-dialog" id="practiceHistoryDialog" aria-labelledby="practiceHistoryTitle">
+    <div class="practice-history-heading">
+        <div>
+            <p class="eyebrow">PRACTICE RECORD</p>
+            <h2 id="practiceHistoryTitle">Previous Answers</h2>
+        </div>
+        <button class="button button-small" id="closePracticeHistoryButton" type="button">Close</button>
+    </div>
+    <p class="practice-history-summary" id="practiceHistorySummary"></p>
+    <div class="practice-history-list" id="practiceHistoryList"></div>
+</dialog>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared/config.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="../dashboard/chat.js"></script>
+<script src="game-chat.js"></script>
+<script src="practice.js"></script>
+<script src="effects.js"></script>
+</body>
+</html>

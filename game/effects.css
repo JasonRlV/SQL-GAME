@@ -1,0 +1,462 @@
+/* SQL Quest - sound & animation effects (add-on).
+   Works together with effects.js. Does not override any existing rule;
+   everything here uses new "fx-" classes. */
+
+/* ---------- Screen flash (green = correct, red = wrong) ---------- */
+.fx-flash {
+    position: fixed;
+    z-index: 15;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.fx-flash[data-kind="success"] {
+    background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 255, 136, 0.28) 100%);
+    animation: fx-flash 0.7s ease-out;
+}
+
+.fx-flash[data-kind="error"] {
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(255, 53, 110, 0.34) 100%);
+    animation: fx-flash 0.7s ease-out;
+}
+
+@keyframes fx-flash {
+    0% { opacity: 0; }
+    20% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* ---------- Shake on wrong answer ---------- */
+.fx-shake {
+    animation: fx-shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes fx-shake {
+    10%, 90% { transform: translateX(-2px); }
+    20%, 80% { transform: translateX(4px); }
+    30%, 50%, 70% { transform: translateX(-8px); }
+    40%, 60% { transform: translateX(8px); }
+}
+
+/* ---------- Result panel entrance ---------- */
+.fx-result-in {
+    animation: fx-result-in 0.35s ease-out both;
+}
+
+@keyframes fx-result-in {
+    from { opacity: 0; transform: translateY(10px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+}
+
+/* ---------- Heart break ---------- */
+.fx-heart-break {
+    display: inline-block;
+    animation: fx-heart-break 0.8s ease-out both;
+}
+
+@keyframes fx-heart-break {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.7) rotate(-12deg); }
+    45% { transform: scale(1.4) rotate(10deg); }
+    70% { transform: scale(0.8) rotate(-6deg); }
+    100% { transform: scale(1) rotate(0); }
+}
+
+/* ---------- Score pop + floating "+N" ---------- */
+.fx-score-pop {
+    display: inline-block;
+    animation: fx-score-pop 0.55s ease-out both;
+}
+
+@keyframes fx-score-pop {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.5); color: var(--game-green, #00ff88); text-shadow: 0 0 14px rgba(0, 255, 136, 0.8); }
+    100% { transform: scale(1); }
+}
+
+.fx-float {
+    position: fixed;
+    z-index: 25;
+    pointer-events: none;
+    color: var(--game-green, #00ff88);
+    font: 700 1.1rem "Orbitron", sans-serif;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.7);
+    animation: fx-float 1.1s ease-out forwards;
+}
+
+@keyframes fx-float {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-46px); }
+}
+
+/* ---------- Hint unlock glow ---------- */
+.fx-hint-glow {
+    animation: fx-hint-glow 0.9s ease-out both;
+}
+
+@keyframes fx-hint-glow {
+    0% { box-shadow: 0 0 0 rgba(255, 209, 102, 0); }
+    35% { box-shadow: 0 0 22px rgba(255, 209, 102, 0.55); }
+    100% { box-shadow: 0 0 0 rgba(255, 209, 102, 0); }
+}
+
+/* ---------- Game over entrance (pure CSS, no JS needed) ---------- */
+.game-over-screen:not([hidden]) .game-over-card {
+    animation: fx-gameover-in 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+@keyframes fx-gameover-in {
+    from { opacity: 0; transform: translateY(30px) scale(0.9); }
+    to { opacity: 1; transform: none; }
+}
+
+/* ---------- Confetti canvas ---------- */
+.fx-confetti {
+    position: fixed;
+    z-index: 30;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* ---------- Respect "reduce motion" ---------- */
+@media (prefers-reduced-motion: reduce) {
+    .fx-shake,
+    .fx-result-in,
+    .fx-heart-break,
+    .fx-score-pop,
+    .fx-float,
+    .fx-hint-glow,
+    .fx-flash,
+    .game-over-screen:not([hidden]) .game-over-card {
+        animation: none !important;
+    }
+
+    .fx-confetti {
+        display: none;
+    }
+}
+
+/* =====================================================================
+   AESTHETIC PACK - ambient neon visuals
+   (all new "fx-" classes; toggled from user settings via body.fx-visuals-off)
+   ===================================================================== */
+
+/* ---------- Ambient floating particles (canvas behind the page) ---------- */
+.fx-ambient {
+    position: fixed;
+    z-index: -1;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* ---------- Cursor glow ---------- */
+.fx-cursor-glow {
+    position: fixed;
+    z-index: 5;
+    top: 0;
+    left: 0;
+    width: 340px;
+    height: 340px;
+    margin: -170px 0 0 -170px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 255, 245, 0.11), rgba(185, 103, 255, 0.06) 45%, transparent 70%);
+    mix-blend-mode: screen;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+    will-change: transform;
+}
+
+.fx-cursor-glow.is-active {
+    opacity: 1;
+}
+
+@media (hover: none), (pointer: coarse) {
+    .fx-cursor-glow {
+        display: none;
+    }
+}
+
+/* ---------- Panels "breathe" with a soft neon glow ----------
+   Each keyframe repeats the panel's own original shadow and only adds a glow. */
+body:not(.fx-visuals-off) .question-panel,
+body:not(.fx-visuals-off) .game-panel {
+    animation: fx-breathe-game 6s ease-in-out infinite alternate;
+}
+
+body:not(.fx-visuals-off) .topic-form,
+body:not(.fx-visuals-off) .exercise,
+body:not(.fx-visuals-off) .loading-panel {
+    animation: fx-breathe-practice 6s ease-in-out infinite alternate;
+}
+
+body:not(.fx-visuals-off) .launch-panel {
+    animation: fx-breathe-launch 6s ease-in-out infinite alternate;
+}
+
+body:not(.fx-visuals-off) .auth-container {
+    animation: fx-breathe-auth 6s ease-in-out infinite alternate;
+}
+
+@keyframes fx-breathe-game {
+    from { box-shadow: 0 12px 40px rgba(0, 0, 0, 0.16), 0 0 0 rgba(0, 255, 245, 0); }
+    to { box-shadow: 0 12px 40px rgba(0, 0, 0, 0.16), 0 0 28px rgba(0, 255, 245, 0.1); }
+}
+
+@keyframes fx-breathe-practice {
+    from { box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18), 0 0 0 rgba(0, 255, 245, 0); }
+    to { box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18), 0 0 30px rgba(0, 255, 245, 0.1); }
+}
+
+@keyframes fx-breathe-launch {
+    from { box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28), 0 0 65px rgba(0, 255, 245, 0.045), inset 0 1px 0 rgba(255, 255, 255, 0.035); }
+    to { box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28), 0 0 85px rgba(0, 255, 245, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.035); }
+}
+
+@keyframes fx-breathe-auth {
+    from { box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42), 0 0 65px rgba(0, 255, 245, 0.055), inset 0 1px 0 rgba(255, 255, 255, 0.04); }
+    to { box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42), 0 0 85px rgba(0, 255, 245, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.04); }
+}
+
+/* ---------- New question slides in ---------- */
+.fx-question-in {
+    animation: fx-question-in 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes fx-question-in {
+    from { opacity: 0; transform: translateY(14px); filter: blur(5px); }
+    to { opacity: 1; transform: none; filter: none; }
+}
+
+/* ---------- Click ring (appended to <body>, never touches the button) ---------- */
+.fx-ripple {
+    position: fixed;
+    z-index: 40;
+    width: 14px;
+    height: 14px;
+    margin: -7px 0 0 -7px;
+    border: 2px solid rgba(0, 255, 245, 0.85);
+    border-radius: 50%;
+    box-shadow: 0 0 14px rgba(0, 255, 245, 0.55), inset 0 0 8px rgba(185, 103, 255, 0.4);
+    pointer-events: none;
+    animation: fx-ripple 0.65s ease-out forwards;
+}
+
+@keyframes fx-ripple {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(5.5); }
+}
+
+/* ---------- Fields / editor glow while typing ---------- */
+.fx-typing-field.fx-typing-field {
+    border-color: rgba(0, 255, 245, 0.85) !important;
+    box-shadow:
+        0 0 0 3px rgba(0, 255, 245, 0.1),
+        0 0 24px rgba(0, 255, 245, 0.28),
+        inset 0 0 18px rgba(0, 255, 245, 0.06) !important;
+}
+
+/* ---------- Neon text selection ---------- */
+:root ::selection {
+    background: rgba(185, 103, 255, 0.45);
+    color: #fff;
+}
+
+/* ---------- Brand glitch on hover ---------- */
+.brand:hover {
+    animation: fx-brand-glitch 0.45s steps(2, end) 1;
+}
+
+@keyframes fx-brand-glitch {
+    0% { filter: drop-shadow(2px 0 #ff356e) drop-shadow(-2px 0 #00fff5); transform: translateX(-1px); }
+    25% { filter: drop-shadow(-3px 0 #ff356e) drop-shadow(3px 0 #00fff5); transform: translateX(2px); }
+    50% { filter: drop-shadow(2px 0 #b967ff) drop-shadow(-2px 0 #00ff88); transform: translateX(-2px); }
+    75% { filter: drop-shadow(-1px 0 #ff356e) drop-shadow(1px 0 #00fff5); transform: translateX(1px); }
+    100% { filter: none; transform: none; }
+}
+
+/* ---------- Game over title glitch ---------- */
+.game-over-screen:not([hidden]) .game-over-card h1 {
+    animation: fx-gameover-glitch 1s steps(3, end) 0.5s 1;
+}
+
+@keyframes fx-gameover-glitch {
+    0% { filter: none; transform: none; }
+    15% { filter: drop-shadow(4px 0 #ff356e) drop-shadow(-4px 0 #00fff5); transform: translateX(-3px) skewX(-6deg); }
+    30% { filter: none; transform: none; }
+    45% { filter: drop-shadow(-5px 0 #ff356e) drop-shadow(5px 0 #00fff5); transform: translateX(4px) skewX(5deg); }
+    60% { filter: none; transform: none; }
+    80% { filter: drop-shadow(2px 0 #b967ff); transform: translateX(-1px); }
+    100% { filter: none; transform: none; }
+}
+
+/* ---------- Last life: heartbeat + red vignette ---------- */
+#gameLives.fx-danger .game-heart:not(.is-lost) {
+    animation: fx-heartbeat 1s ease-in-out infinite;
+}
+
+@keyframes fx-heartbeat {
+    0%, 100% { transform: scale(1); }
+    15% { transform: scale(1.35); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.22); }
+    60% { transform: scale(1); }
+}
+
+.fx-danger-vignette {
+    position: fixed;
+    z-index: 14;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 58%, rgba(255, 53, 110, 0.32) 100%);
+    pointer-events: none;
+    animation: fx-danger-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes fx-danger-pulse {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 1; }
+}
+
+/* ---------- Combo toast ---------- */
+.fx-combo {
+    position: fixed;
+    z-index: 26;
+    top: 84px;
+    left: 50%;
+    background: linear-gradient(100deg, #00fff5, #b967ff 55%, #ff356e);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 12px rgba(185, 103, 255, 0.7));
+    font: 900 1.45rem "Orbitron", sans-serif;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translateX(-50%);
+    animation: fx-combo 1.6s ease-out forwards;
+}
+
+@keyframes fx-combo {
+    0% { opacity: 0; transform: translateX(-50%) translateY(12px) scale(0.6); }
+    18% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1.18); }
+    32% { transform: translateX(-50%) scale(1); }
+    80% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-16px) scale(1); }
+}
+
+body.fx-visuals-off .fx-ambient,
+body.fx-visuals-off .fx-scan,
+body.fx-visuals-off .fx-cursor-glow,
+body.fx-visuals-off .fx-danger-vignette {
+    display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fx-question-in,
+    .fx-ripple,
+    .fx-combo,
+    .fx-message-in,
+    .fx-row-in,
+    .fx-page-in,
+    .fx-scan,
+    dialog[open],
+    dialog[open]::backdrop,
+    .fx-danger-vignette,
+    #gameLives.fx-danger .game-heart:not(.is-lost),
+    .brand:hover,
+    .game-over-screen:not([hidden]) .game-over-card h1,
+    body:not(.fx-visuals-off) .question-panel,
+    body:not(.fx-visuals-off) .game-panel,
+    body:not(.fx-visuals-off) .topic-form,
+    body:not(.fx-visuals-off) .exercise,
+    body:not(.fx-visuals-off) .loading-panel,
+    body:not(.fx-visuals-off) .launch-panel,
+    body:not(.fx-visuals-off) .auth-container {
+        animation: none !important;
+    }
+
+    .fx-ambient,
+    .fx-cursor-glow {
+        display: none;
+    }
+}
+
+/* =====================================================================
+   SITE-WIDE additions (login, dashboard, practice, game)
+   ===================================================================== */
+
+/* ---------- Page fade-in (opacity only, so nothing shifts) ---------- */
+.fx-page-in {
+    animation: fx-page-in 0.6s ease-out both;
+}
+
+@keyframes fx-page-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ---------- One neon scan line sweeping down on page load ---------- */
+.fx-scan {
+    position: fixed;
+    z-index: 45;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 245, 0.9), rgba(185, 103, 255, 0.9), transparent);
+    box-shadow: 0 0 24px 6px rgba(0, 255, 245, 0.35);
+    opacity: 0;
+    pointer-events: none;
+    animation: fx-scan 1.2s ease-in-out forwards;
+}
+
+@keyframes fx-scan {
+    0% { opacity: 0; transform: translateY(0); }
+    10% { opacity: 1; }
+    90% { opacity: 0.8; }
+    100% { opacity: 0; transform: translateY(100vh); }
+}
+
+/* ---------- Dialogs pop in (dashboard guide/leaderboard, practice history) ---------- */
+dialog[open] {
+    animation: fx-dialog-in 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+}
+
+dialog[open]::backdrop {
+    animation: fx-fade-in 0.3s ease-out both;
+}
+
+@keyframes fx-dialog-in {
+    from { opacity: 0; transform: translateY(18px) scale(0.96); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes fx-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ---------- Chat messages slide in ---------- */
+.fx-message-in {
+    animation: fx-message-in 0.4s ease-out both;
+}
+
+@keyframes fx-message-in {
+    from { opacity: 0; transform: translateY(10px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+}
+
+/* ---------- Leaderboard rows cascade ---------- */
+.fx-row-in {
+    animation: fx-row-in 0.45s ease-out both;
+}
+
+@keyframes fx-row-in {
+    from { opacity: 0; transform: translateX(-14px); }
+    to { opacity: 1; transform: none; }
+}

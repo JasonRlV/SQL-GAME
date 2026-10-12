@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#090a18">
+    <title>SQL Quest — Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="../game/effects.css">
+</head>
+<body>
+<aside class="ai-chat is-closed" id="aiChatPanel" aria-label="AI SQL assistant" aria-hidden="true">
+    <div class="chat-resizer" id="chatResizer" role="separator" tabindex="0" aria-label="Resize SQL assistant panel" aria-orientation="vertical" aria-valuemin="280" aria-valuemax="680" aria-valuenow="420"></div>
+    <div class="ai-chat-header">
+        <span class="chat-avatar" aria-hidden="true">✦</span>
+        <div class="chat-heading">
+            <h2>SQL Assistant</h2>
+            <span>Ask questions about SQL</span>
+        </div>
+        <div class="chat-header-actions">
+            <span class="chat-status" id="chatStatus" aria-live="polite">Groq selected</span>
+            <button class="chat-clear" id="clearChatButton" type="button" disabled>Clear chat</button>
+        </div>
+        <button class="chat-close" id="chatCloseButton" type="button" aria-label="Close SQL assistant">
+            <span aria-hidden="true">×</span>
+        </button>
+    </div>
+    <div class="ai-chat-content" id="chatContent">
+        <div class="chat-intro">
+            <span class="chat-intro-icon" aria-hidden="true">✦</span>
+            <p>Ask questions about SQL. If a model reaches its usage limit, the assistant will switch providers and keep the conversation going.</p>
+        </div>
+        <div class="chat-messages" id="chatMessages" role="log" aria-live="polite" aria-relevant="additions"></div>
+        <form class="chat-form" id="chatForm">
+            <label class="chat-model-label" for="chatModel">Model</label>
+            <select class="chat-model" id="chatModel" name="model" disabled>
+                <option value="groq">Groq (default)</option>
+                <option value="gemini">Gemini</option>
+            </select>
+            <div class="chat-composer">
+                <label class="visually-hidden" for="chatMessage">Message the SQL assistant</label>
+                <textarea id="chatMessage" rows="2" maxlength="3000" placeholder="Ask an SQL question…" disabled></textarea>
+                <button class="chat-send" id="chatSend" type="submit" disabled aria-label="Send message">↑</button>
+            </div>
+        </form>
+        <p class="chat-note" id="chatNote" role="status" aria-live="polite">Sign in to start chatting. Choose Groq or Gemini at any time.</p>
+    </div>
+</aside>
+
+<main class="page-shell">
+    <header class="topbar">
+        <div class="brand-cluster">
+            <a class="logo" href="dashboard.html" aria-label="SQL Quest dashboard">SQL QUEST</a>
+            <a class="account-profile" id="accountProfile" href="settings.html" aria-label="Open profile settings">
+                <img class="account-avatar" id="accountAvatar" alt="" width="38" height="38">
+                <span class="account-username" id="accountUsername">Loading profile…</span>
+            </a>
+        </div>
+
+        <div class="game-stats" aria-label="Current game stats">
+            <div class="stat">
+                <span class="stat-label">Total points</span>
+                <strong class="stat-value" id="dashboardScore">…</strong>
+            </div>
+        </div>
+
+        <div class="account-actions">
+            <button class="button button-light leaderboard-link" id="leaderboardButton" type="button">🏆 <span>Leaderboard</span></button>
+            <button class="button button-chat" id="chatToggle" type="button" aria-expanded="false" aria-controls="aiChatPanel" aria-label="Open SQL assistant">
+                <span aria-hidden="true">💬</span><span>Chat</span>
+            </button>
+        </div>
+    </header>
+
+    <section class="launch-panel" id="launchPanel" data-difficulty="easy" aria-labelledby="dashboardTitle">
+        <h1 id="dashboardTitle">SQL QUEST</h1>
+        <p class="launch-copy">Master SQL queries through interactive challenges. Write the right queries, earn points, and become a database master!</p>
+
+        <div class="difficulty">
+            <p class="section-label">Choose your challenge level</p>
+            <div class="difficulty-options" role="group" aria-label="Select difficulty">
+                <button class="difficulty-button is-selected" type="button" data-difficulty="easy" aria-pressed="true">Easy</button>
+                <button class="difficulty-button" type="button" data-difficulty="normal" aria-pressed="false">Medium</button>
+                <button class="difficulty-button" type="button" data-difficulty="hard" aria-pressed="false">Hard</button>
+            </div>
+            <p class="difficulty-preview" id="difficultyPreview" aria-live="polite" aria-atomic="true">
+                <span class="preview-indicator" aria-hidden="true"></span>
+                <strong id="difficultyName">Easy</strong>
+                <span id="difficultyDescription">A relaxed introduction to SQL.</span>
+            </p>
+        </div>
+
+        <div class="launch-actions">
+            <button class="button button-start" id="startGameButton" type="button">
+                Start game
+            </button>
+            <div class="secondary-actions">
+                <a class="button button-practice" href="../game/practice.html" aria-label="Open Practice SQL">🎯 <span>Practice SQL</span></a>
+                <button class="button button-practice" id="gameGuideButton" type="button" aria-haspopup="dialog" aria-controls="gameGuideDialog">📖 <span>Game guide</span></button>
+            </div>
+        </div>
+        <p class="dashboard-status" id="dashboardStatus" role="status" hidden></p>
+    </section>
+
+    <section class="loadout" aria-label="Game features">
+        <div class="feature-row">
+            <button class="feature" type="button" data-feature="difficulty">
+                <span class="feature-icon" aria-hidden="true">🎯</span>
+                <h2>3 Difficulty Levels</h2>
+                <span class="feature-type">GAME MODE</span>
+            </button>
+            <button class="feature" type="button" data-feature="hints">
+                <span class="feature-icon" aria-hidden="true">💡</span>
+                <h2>Hint System</h2>
+                <span class="feature-type">ABILITY</span>
+            </button>
+            <button class="feature" type="button" data-feature="lives">
+                <span class="feature-icon" aria-hidden="true">💗</span>
+                <h2>3 Lives</h2>
+                <span class="feature-type">SURVIVAL</span>
+            </button>
+            <button class="feature" type="button" data-feature="leaderboard">
+                <span class="feature-icon" aria-hidden="true">🏆</span>
+                <h2>Leaderboard</h2>
+                <span class="feature-type">RANKING</span>
+            </button>
+            <button class="feature" type="button" data-feature="assistant">
+                <span class="feature-icon" aria-hidden="true">💬</span>
+                <h2>SQL Assistant</h2>
+                <span class="feature-type">SUPPORT</span>
+            </button>
+        </div>
+    </section>
+</main>
+
+<dialog class="feature-dialog" id="featureDialog" aria-labelledby="featureDialogTitle" aria-describedby="featureDialogDescription">
+    <div class="feature-dialog-card">
+        <span class="feature-dialog-icon" id="featureDialogIcon" aria-hidden="true"></span>
+        <h2 id="featureDialogTitle"></h2>
+        <p class="feature-dialog-description" id="featureDialogDescription"></p>
+        <ul class="feature-dialog-points" id="featureDialogPoints"></ul>
+        <button class="button button-primary feature-dialog-close" id="featureDialogClose" type="button">Got it!</button>
+    </div>
+</dialog>
+
+<dialog class="game-guide-dialog" id="gameGuideDialog" aria-labelledby="gameGuideTitle" aria-describedby="gameGuideDescription">
+    <article class="game-guide-card">
+        <header class="game-guide-heading">
+            <div>
+                <p class="leaderboard-eyebrow">PLAYER HANDBOOK</p>
+                <h2 id="gameGuideTitle">SQL Quest Game Guide</h2>
+                <p id="gameGuideDescription">A friendly walkthrough of challenge mode, points, hints, and practice.</p>
+            </div>
+            <button class="leaderboard-close" id="gameGuideClose" type="button" aria-label="Close game guide">×</button>
+        </header>
+
+        <nav class="game-guide-nav" aria-label="Guide sections">
+            <a href="#guide-start">Getting started</a>
+            <a href="#guide-points">Points &amp; hints</a>
+            <a href="#guide-practice">Practice mode</a>
+        </nav>
+
+        <div class="game-guide-content">
+            <section class="game-guide-section" id="guide-start">
+                <span class="game-guide-number">01</span>
+                <div>
+                    <h3>Start a scored game</h3>
+                    <ol>
+                        <li>Choose a difficulty on the dashboard, then select <strong>Start game</strong>.</li>
+                        <li>Read the task and inspect the table name, column names, data types, and sample rows.</li>
+                        <li>Write a read-only SQL query in the editor and select <strong>Check answer</strong>.</li>
+                        <li>Learn from the feedback. The game checks your query with AI; it does not run it against a database.</li>
+                    </ol>
+                    <p class="game-guide-note">Press Tab in the SQL editor to insert indentation. Use Clear if you want to rewrite your query.</p>
+                </div>
+            </section>
+
+            <section class="game-guide-section">
+                <span class="game-guide-number">02</span>
+                <div>
+                    <h3>Pick the right challenge</h3>
+                    <ul>
+                        <li><strong>Easy:</strong> a single table, a basic SELECT, and one WHERE filter.</li>
+                        <li><strong>Medium:</strong> filtering with sorting, or a simple aggregate.</li>
+                        <li><strong>Hard:</strong> GROUP BY with HAVING, or a meaningful aggregate query.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="game-guide-section" id="guide-points">
+                <span class="game-guide-number">03</span>
+                <div>
+                    <h3>Points, hints, and lives</h3>
+                    <ul>
+                        <li>A correct answer earns <strong>10 points on Easy</strong>, <strong>25 on Medium</strong>, or <strong>50 on Hard</strong>.</li>
+                        <li>Your total points are saved to your signed-in account. The dashboard and game show that permanent balance.</li>
+                        <li>Each scored question has three progressive hints. Their costs are <strong>3, 5, and 7 points</strong>, in order.</li>
+                        <li>You need enough points for the full hint cost. Once unlocked, you can revisit a hint without paying again.</li>
+                        <li>You start with <strong>3 lives</strong>. An incorrect answer costs one life; the question still completes and the game moves on.</li>
+                    </ul>
+                    <p class="game-guide-note">The in-game score is for the current run. Total points are your persistent account balance; starting another run does not reset that balance.</p>
+                </div>
+            </section>
+
+            <section class="game-guide-section">
+                <span class="game-guide-number">04</span>
+                <div>
+                    <h3>Review your answers</h3>
+                    <p>Select <strong>View History</strong> on the game page to review questions, their table data, your submitted SQL, and the feedback. Your completed game history is saved to your account, with a browser copy available as a backup.</p>
+                </div>
+            </section>
+
+            <section class="game-guide-section" id="guide-practice">
+                <span class="game-guide-number">05</span>
+                <div>
+                    <h3>Practice without scoring</h3>
+                    <p>Choose <strong>Practice SQL</strong> to enter any SQL topic you want to work on. Each exercise comes with its own question, tables, sample data, and up to five free progressive hints.</p>
+                    <p>Practice answers do not award or deduct points and do not cost lives. Use View History to review submitted answers. Practice queries are checked by AI and are not executed.</p>
+                </div>
+            </section>
+
+            <section class="game-guide-section">
+                <span class="game-guide-number">06</span>
+                <div>
+                    <h3>Leaderboard &amp; SQL Assistant</h3>
+                    <p>The leaderboard ranks accounts with positive permanent point balances; tied scores share a rank. Refresh it to request current results.</p>
+                    <p>Open Chat to ask the SQL Assistant about SQL concepts and query structure. It can explain an idea, but your game answer still needs to solve the displayed challenge.</p>
+                </div>
+            </section>
+        </div>
+        <footer class="game-guide-footer">
+            <span>Ready to try a challenge?</span>
+            <button class="button button-primary" id="gameGuideDone" type="button">Got it</button>
+        </footer>
+    </article>
+</dialog>
+
+<dialog class="leaderboard-dialog" id="leaderboardDialog" aria-labelledby="leaderboardTitle" aria-describedby="leaderboardDescription">
+    <section class="leaderboard-card">
+        <header class="leaderboard-heading">
+            <div>
+                <p class="leaderboard-eyebrow">PLAYER RANKINGS</p>
+                <h2 id="leaderboardTitle">SQL Game Leaderboard</h2>
+                <p class="leaderboard-description" id="leaderboardDescription">Players are ranked by their permanently saved total points.</p>
+            </div>
+            <button class="leaderboard-close" id="leaderboardClose" type="button" aria-label="Close leaderboard">×</button>
+        </header>
+        <div class="leaderboard-actions">
+            <p class="leaderboard-status" id="leaderboardStatus" role="status" aria-live="polite" hidden></p>
+            <button class="button button-light leaderboard-refresh" id="refreshLeaderboard" type="button">↻ Refresh</button>
+        </div>
+        <p class="leaderboard-error" id="leaderboardError" role="alert" hidden></p>
+        <p class="leaderboard-empty" id="leaderboardEmpty" hidden>
+            No players have earned points yet. Complete a SQL challenge to appear on the leaderboard!
+        </p>
+        <div class="leaderboard-table-wrap" id="leaderboardTableWrap" hidden>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Rank</th>
+                        <th scope="col">Username</th>
+                        <th scope="col" class="leaderboard-points-column">Total Points</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardRows"></tbody>
+            </table>
+        </div>
+        <p class="leaderboard-updated" id="leaderboardUpdated" hidden></p>
+    </section>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared/config.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="chat.js"></script>
+<script src="leaderboard.js"></script>
+<script src="auth.js"></script>
+<script src="../game/effects.js"></script>
+</body>
+</html>

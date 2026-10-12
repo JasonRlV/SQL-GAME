@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#090a18">
+    <title>SQL Quest — Settings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+    <main class="settings-shell">
+        <header class="settings-header">
+            <div class="header-meta">
+                <p class="eyebrow">My account</p>
+                <h1>Settings</h1>
+            </div>
+            <div class="settings-header-actions">
+                <a class="button button-light" href="dashboard.html" aria-label="Back to dashboard">← Dashboard</a>
+            </div>
+        </header>
+
+        <p class="guest-notice" id="guestNotice" role="status" hidden>
+            You’re playing as a guest. Account settings aren’t available, but you can sign out here.
+        </p>
+
+        <section class="settings-card" aria-label="Account settings">
+            <div class="settings-grid">
+                <section class="settings-section" aria-labelledby="profileHeading">
+                    <div class="section-heading">
+                        <p class="eyebrow">Profile</p>
+                        <h2 id="profileHeading">Profile information</h2>
+                    </div>
+                <form id="profileForm" class="settings-form" novalidate>
+                    <div class="field-group">
+                        <label for="usernameInput">Username</label>
+                        <input id="usernameInput" name="username" type="text" maxlength="20" placeholder="Your username" autocomplete="username">
+                    </div>
+
+                    <div class="readonly-field">
+                        <span class="field-label">Email address</span>
+                        <strong id="emailReadout">Loading…</strong>
+                    </div>
+
+                    <div class="settings-actions">
+                        <button class="button button-primary" id="saveProfileButton" type="submit">Save changes</button>
+                        <button class="button button-light" id="cancelProfileButton" type="button">Cancel</button>
+                    </div>
+                    <p class="form-message" id="profileMessage" role="status" aria-live="polite"></p>
+                </form>
+                </section>
+
+                <section class="settings-section" aria-labelledby="passwordHeading">
+                    <div class="section-heading">
+                        <p class="eyebrow">Security</p>
+                        <h2 id="passwordHeading">Change password</h2>
+                    </div>
+
+                <form id="passwordForm" class="settings-form" novalidate>
+                    <div class="field-group">
+                        <label for="currentPasswordInput">Current password</label>
+                        <input id="currentPasswordInput" name="currentPassword" type="password" autocomplete="current-password" placeholder="Enter your current password">
+                    </div>
+
+                    <div class="field-group">
+                        <label for="newPasswordInput">New password</label>
+                        <input id="newPasswordInput" name="newPassword" type="password" autocomplete="new-password" placeholder="At least 8 characters">
+                    </div>
+
+                    <div class="field-group">
+                        <label for="confirmPasswordInput">Confirm new password</label>
+                        <input id="confirmPasswordInput" name="confirmPassword" type="password" autocomplete="new-password" placeholder="Repeat the new password">
+                    </div>
+
+                    <button class="button button-primary" id="savePasswordButton" type="submit">Update password</button>
+                    <p class="form-message" id="passwordMessage" role="status" aria-live="polite"></p>
+                </form>
+                </section>
+
+                <section class="settings-section" aria-labelledby="photoHeading">
+                    <div class="section-heading">
+                        <p class="eyebrow">Avatar</p>
+                        <h2 id="photoHeading">Profile picture</h2>
+                    </div>
+
+                <div class="avatar-panel">
+                    <img id="avatarPreview" class="avatar-preview" alt="Current profile picture preview" src="" width="120" height="120">
+                    <div class="avatar-actions">
+                        <label class="button button-primary" for="avatarInput">Upload image</label>
+                        <input id="avatarInput" type="file" accept="image/png,image/jpeg,image/webp">
+                        <button class="button button-light" id="removeAvatarButton" type="button">Remove</button>
+                    </div>
+                </div>
+                <p class="upload-hint">PNG, JPEG, or WebP only. Maximum size: 2 MB.</p>
+                <p class="form-message" id="avatarMessage" role="status" aria-live="polite"></p>
+                </section>
+            </div>
+        </section>
+
+        <section class="settings-card account-panel" aria-labelledby="accountActionsHeading">
+            <div class="section-heading">
+                <p class="eyebrow">Account</p>
+                <h2 id="accountActionsHeading">Account actions</h2>
+            </div>
+            <p class="account-panel-copy">Sign out of SQL Quest on this device.</p>
+            <div class="settings-actions">
+                <button class="button button-danger" id="settingsSignOutButton" type="button">Sign out</button>
+            </div>
+            <p class="form-message" id="accountMessage" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="settings-card preferences-panel" aria-labelledby="preferencesHeading">
+            <div class="section-heading">
+                <p class="eyebrow">Experience</p>
+                <h2 id="preferencesHeading">Sound &amp; animation</h2>
+            </div>
+            <div class="preference-list">
+                <label class="preference-option" for="muteSoundToggle">
+                    <span class="preference-copy">
+                        <strong>Mute sound effects</strong>
+                        <span>Turn off game sounds on this device.</span>
+                    </span>
+                    <input id="muteSoundToggle" type="checkbox">
+                </label>
+                <label class="preference-option" for="disableVisualsToggle">
+                    <span class="preference-copy">
+                        <strong>Disable animated background</strong>
+                        <span>Turn off ambient particles and panel animations.</span>
+                    </span>
+                    <input id="disableVisualsToggle" type="checkbox">
+                </label>
+            </div>
+            <p class="form-message" id="preferencesMessage" role="status" aria-live="polite"></p>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../shared/config.js"></script>
+    <script src="../shared/auth.js"></script>
+    <script src="settings.js"></script>
+</body>
+</html>
