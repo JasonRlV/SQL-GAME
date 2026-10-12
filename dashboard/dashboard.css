@@ -1619,7 +1619,7 @@ h1 {
         grid-area: actions;
     }
 
-    body.chat-open .account-actions .button-light span {
+    body.chat-open .account-actions .button-light .button-label {
         display: none;
     }
 }
@@ -1671,8 +1671,8 @@ h1 {
         font-size: 0.59rem;
     }
 
-    .account-actions .button span {
-        display: none;
+    .account-actions .button-label {
+        display: inline;
     }
 
     .launch-panel {
@@ -1766,8 +1766,8 @@ h1 {
         padding-left: 13px;
     }
 
-    .account-actions .button span {
-        display: none;
+    .account-actions .button-label {
+        display: inline;
     }
 
     .account-actions .button-light {

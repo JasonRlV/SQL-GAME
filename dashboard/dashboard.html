@@ -66,9 +66,11 @@
         </div>
 
         <div class="account-actions">
-            <button class="button button-light leaderboard-link" id="leaderboardButton" type="button">🏆 <span>Leaderboard</span></button>
+            <button class="button button-light leaderboard-link" id="leaderboardButton" type="button" aria-label="Open leaderboard">
+                <span aria-hidden="true">🏆</span><span class="button-label">Leaderboard</span>
+            </button>
             <button class="button button-chat" id="chatToggle" type="button" aria-expanded="false" aria-controls="aiChatPanel" aria-label="Open SQL assistant">
-                <span aria-hidden="true">💬</span><span>Chat</span>
+                <span aria-hidden="true">💬</span><span class="button-label">Chat</span>
             </button>
         </div>
     </header>
