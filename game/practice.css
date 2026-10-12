@@ -185,7 +185,23 @@ button, input, textarea { font: inherit; }
     .topic-controls .button { width: 100%; }
     .exercise-heading { flex-direction: column; }
     .hint-heading { align-items: flex-start; flex-direction: column; }
-    .practice-topbar { min-height: 62px; }
-    .practice-topbar .game-header-actions { gap: 5px; }
-    .practice-topbar .back-link { padding: 7px 8px; font-size: .68rem; }
+    .practice-topbar {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px 0;
+    }
+    .practice-topbar .game-header-actions {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+    }
+    .practice-topbar .back-link {
+        min-width: 0;
+        min-height: 36px;
+        gap: 4px;
+        padding: 6px 4px;
+        font-size: .58rem;
+        text-align: center;
+    }
 }

@@ -805,28 +805,57 @@ textarea {
     }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 620px) {
     .game-topbar {
-        gap: 6px;
-        min-height: 60px;
+        align-items: stretch;
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px 0;
     }
 
     .game-brand-cluster {
-        flex-wrap: wrap;
-        gap: 6px;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
     }
 
     .game-status-cluster {
-        flex-wrap: wrap;
-        gap: 4px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 5px;
+        width: 100%;
     }
 
     .game-stat-bubble {
-        gap: 5px;
-        padding: 6px 7px;
+        justify-content: center;
+        gap: 4px;
+        min-width: 0;
+        padding: 6px 4px;
         font-size: 0.58rem;
     }
 
+    .game-hearts {
+        gap: 2px;
+        font-size: 0.72rem;
+    }
+
+    .game-topbar .game-header-actions {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    .game-header-actions .back-link {
+        justify-content: center;
+        min-width: 0;
+        min-height: 36px;
+        gap: 4px;
+        padding: 6px 4px;
+        font-size: 0.58rem;
+    }
+}
+
+@media (max-width: 420px) {
     .brand {
         font-size: 0.75rem;
         letter-spacing: 0.06em;
@@ -834,14 +863,6 @@ textarea {
 
     .back-link {
         min-height: 34px;
-        gap: 5px;
-        padding: 6px 8px;
-        font-size: 0.65rem;
-    }
-
-    .game-hearts {
-        gap: 2px;
-        font-size: 0.72rem;
     }
 
     .game-titlebar {
