@@ -64,6 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentHistoryEntry = null;
     let historyStorageError = '';
     let historyReturnToGame = false;
+    let historySaveMessage = 'Game history is saved temporarily in this browser.';
 
     const readLocalGameRecord = () => {
         try {
@@ -328,104 +329,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             historyStorageError = `Unable to save game history in this browser: ${error.message}`;
         }
         gameOverScore.textContent = `Final score: ${game?.score ?? 0} points`;
-        gameOverSaveStatus.textContent = historyStorageError || 'Game history is saved temporarily in this browser.';
+        gameOverSaveStatus.textContent = historyStorageError || historySaveMessage;
         gameOverSaveStatus.hidden = false;
         gameOverHome.hidden = false;
         gameHistoryView.hidden = true;
         gameOverScreen.hidden = false;
         viewHistoryButton.focus();
-    };
-
-    const appendHistoryCode = (parent, label, sql) => {
-        const heading = document.createElement('p');
-        heading.className = 'game-history-attempt-label';
-        heading.textContent = label;
-        const code = document.createElement('pre');
-        code.className = 'game-history-code';
-        const codeContent = document.createElement('code');
-        codeContent.textContent = sql;
-        code.append(codeContent);
-        parent.append(heading, code);
-    };
-
-    const appendHistoryTable = (parent, item) => {
-        if (Array.isArray(item.tables)) {
-            item.tables.forEach(table => {
-                if (!Array.isArray(table.columns) || !Array.isArray(table.rows)) return;
-                const heading = document.createElement('p');
-                heading.className = 'game-history-attempt-label';
-                heading.textContent = `Table: ${table.name || 'Question data'}`;
-                const wrapper = document.createElement('div');
-                wrapper.className = 'game-history-table-wrap';
-                wrapper.append(createTable(
-                    table.columns.map(column => `${column.name} · ${column.type}`),
-                    table.rows,
-                    'schema-table',
-                ));
-                parent.append(heading, wrapper);
-            });
-            return;
-        }
-        if (!Array.isArray(item.columns) || !Array.isArray(item.rows)) return;
-        const heading = document.createElement('p');
-        heading.className = 'game-history-attempt-label';
-        heading.textContent = `Table: ${item.tableName || 'Question data'}`;
-        const wrapper = document.createElement('div');
-        wrapper.className = 'game-history-table-wrap';
-        wrapper.append(createTable(
-            item.columns.map(column => `${column.name} · ${column.type}`),
-            item.rows,
-            'schema-table',
-        ));
-        parent.append(heading, wrapper);
-    };
-
-    const renderGameHistory = history => {
-        gameHistoryList.replaceChildren();
-        history.forEach((item, index) => {
-            const article = document.createElement('article');
-            article.className = 'game-history-entry';
-
-            const heading = document.createElement('div');
-            heading.className = 'game-history-entry-heading';
-            const title = document.createElement('h3');
-            title.textContent = `${index + 1}. ${item.title}`;
-            const status = document.createElement('span');
-            status.className = 'game-history-status';
-            status.dataset.status = item.status;
-            status.textContent = item.status === 'correct'
-                ? 'Correct'
-                : item.status === 'incorrect'
-                    ? 'Incorrect'
-                    : 'Unanswered';
-            heading.append(title, status);
-
-            const question = document.createElement('p');
-            question.className = 'game-history-question';
-            question.textContent = item.question;
-            article.append(heading, question);
-            appendHistoryTable(article, item);
-
-            if (!item.attempts?.length) {
-                const unanswered = document.createElement('p');
-                unanswered.className = 'game-history-attempt';
-                unanswered.textContent = 'No answer was submitted for this question.';
-                article.append(unanswered);
-            } else {
-                item.attempts.forEach((attempt, attemptIndex) => {
-                    const attemptStatus = attempt.status === 'correct' ? 'Correct' : 'Incorrect';
-                    appendHistoryCode(article, `Attempt ${attemptIndex + 1} · ${attemptStatus}`, attempt.submittedAnswer);
-                    const feedback = document.createElement('p');
-                    feedback.className = 'game-history-attempt';
-                    feedback.textContent = attempt.feedback;
-                    article.append(feedback);
-                    if (attempt.status === 'incorrect' && typeof attempt.correctAnswer === 'string') {
-                        appendHistoryCode(article, 'Correct answer', attempt.correctAnswer);
-                    }
-                });
-            }
-            gameHistoryList.append(article);
-        });
     };
 
     const showGameHistory = async () => {
@@ -440,7 +349,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const record = readLocalGameRecord();
             if (record) {
-                renderGameHistory(record.history);
+                GameHistoryRenderer.render(gameHistoryList, record.history, createTable);
                 gameHistorySummary.textContent =
                     `${difficultyNames[record.difficulty]} · ${record.finalScore ?? game?.score ?? 0} points · ${record.history.length} questions`;
                 if (record.completed === false) {
@@ -448,11 +357,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             } else if (gameOver) {
                 const completedRecord = await postGameRequest('/api/game/history');
-                renderGameHistory(completedRecord.history);
+                GameHistoryRenderer.render(gameHistoryList, completedRecord.history, createTable);
                 gameHistorySummary.textContent =
                     `${difficultyNames[completedRecord.difficulty]} · Final score: ${completedRecord.finalScore} · ${completedRecord.history.length} questions`;
             } else {
-                renderGameHistory(sessionHistory);
+                GameHistoryRenderer.render(gameHistoryList, sessionHistory, createTable);
                 gameHistorySummary.textContent = `${difficultyNames[gameDifficulty]} · ${game?.score ?? 0} points · ${sessionHistory.length} questions`;
             }
             gameOverSaveStatus.textContent = historyStorageError || 'Game history is saved temporarily in this browser.';
@@ -567,6 +476,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 sql: submittedAnswer,
             });
             updateGameState(result);
+            historySaveMessage = result.historySaved
+                ? 'Game history saved to your account.'
+                : result.historySaveError
+                    ? `Game history was not saved to your account: ${result.historySaveError}`
+                    : 'Sign in to save and view your game history.';
             questionComplete = true;
             if (currentHistoryEntry) {
                 const attempt = {

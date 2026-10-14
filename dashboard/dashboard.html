@@ -66,6 +66,9 @@
         </div>
 
         <div class="account-actions">
+            <button class="button button-light history-link" id="historyButton" type="button" aria-label="View game history" aria-haspopup="dialog" aria-controls="historyDialog">
+                <span aria-hidden="true">▤</span><span class="button-label">View History</span>
+            </button>
             <button class="button button-light leaderboard-link" id="leaderboardButton" type="button" aria-label="Open leaderboard">
                 <span aria-hidden="true">🏆</span><span class="button-label">Leaderboard</span>
             </button>
@@ -238,6 +241,38 @@
     </article>
 </dialog>
 
+<dialog class="history-dialog" id="historyDialog" aria-labelledby="historyTitle" aria-describedby="historyDescription">
+    <section class="history-card">
+        <header class="leaderboard-heading">
+            <div>
+                <p class="leaderboard-eyebrow">PLAYER RECORDS</p>
+                <h2 id="historyTitle">Game History</h2>
+                <p class="leaderboard-description" id="historyDescription">Your completed SQL Quest games, newest first.</p>
+            </div>
+            <button class="leaderboard-close" id="historyClose" type="button" aria-label="Close game history">×</button>
+        </header>
+
+        <section id="historyListScreen" aria-labelledby="historyTitle">
+            <p class="history-status" id="historyStatus" role="status" aria-live="polite" hidden></p>
+            <p class="history-error" id="historyError" role="alert" hidden></p>
+            <p class="history-guest" id="historyGuest" hidden>Sign in to save and view your game history.</p>
+            <p class="history-empty" id="historyEmpty" hidden>No games yet. Finish a SQL Quest game and it will appear here.</p>
+            <div class="history-game-list" id="historyGames" aria-label="Completed games"></div>
+        </section>
+
+        <section id="historyDetailScreen" aria-labelledby="historyDetailTitle" hidden>
+            <div class="history-detail-heading">
+                <button class="button button-light" id="historyBack" type="button" aria-label="Back to game history">← Back</button>
+                <h3 id="historyDetailTitle">Game details</h3>
+            </div>
+            <p class="history-detail-summary" id="historyDetailSummary"></p>
+            <p class="history-status" id="historyDetailStatus" role="status" aria-live="polite" hidden></p>
+            <p class="history-error" id="historyDetailError" role="alert" hidden></p>
+            <div class="history-detail-list" id="historyDetailList" aria-label="Question and attempt history"></div>
+        </section>
+    </section>
+</dialog>
+
 <dialog class="leaderboard-dialog" id="leaderboardDialog" aria-labelledby="leaderboardTitle" aria-describedby="leaderboardDescription">
     <section class="leaderboard-card">
         <header class="leaderboard-heading">
@@ -276,6 +311,8 @@
 <script src="../shared/config.js"></script>
 <script src="../shared/auth.js"></script>
 <script src="chat.js"></script>
+<script src="../shared/game-history.js"></script>
+<script src="history.js"></script>
 <script src="leaderboard.js"></script>
 <script src="auth.js"></script>
 <script src="../game/effects.js"></script>

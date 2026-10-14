@@ -380,7 +380,7 @@ async function saveGameSessionRecord(request, session, sessionId) {
     }
 }
 
-async function loadGameSessionRecord(request, sessionId) {
+async function loadGameSessionRecord(request, sessionId, userId) {
     if (typeof sessionId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(sessionId)) {
         return null;
     }
@@ -390,6 +390,7 @@ async function loadGameSessionRecord(request, sessionId) {
     try {
         const query = new URLSearchParams({
             id: `eq.${sessionId}`,
+            user_id: `eq.${userId}`,
             select: 'id,difficulty,final_score,history,finished_at',
             limit: '1',
         });
@@ -410,6 +411,64 @@ async function loadGameSessionRecord(request, sessionId) {
         throw error;
     } finally {
         clearTimeout(timeout);
+    }
+}
+
+async function handleGameHistoryList(request, response) {
+    const userId = await authenticateRequest(request, response);
+    if (!userId) return;
+    if (isGuestUserId(userId)) {
+        jsonResponse(response, 200, { guest: true, games: [] });
+        return;
+    }
+
+    const { supabaseUrl, anonKey } = supabaseRestConfig();
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    try {
+        const query = new URLSearchParams({
+            user_id: `eq.${userId}`,
+            select: 'id,difficulty,final_score,finished_at',
+            order: 'finished_at.desc',
+            limit: '100',
+        });
+        const result = await fetch(`${supabaseUrl}/rest/v1/game_sessions?${query}`, {
+            headers: {
+                apikey: anonKey,
+                Authorization: `Bearer ${getBearerToken(request)}`,
+            },
+            signal: controller.signal,
+        });
+        if (!result.ok) throw new Error(`Supabase could not load game history (${result.status}).`);
+        const games = await result.json();
+        jsonResponse(response, 200, { games: Array.isArray(games) ? games : [] });
+    } catch (error) {
+        jsonResponse(response, 503, {
+            error: error.name === 'AbortError'
+                ? 'Loading game history timed out. Please try again.'
+                : error.message,
+        });
+    } finally {
+        clearTimeout(timeout);
+    }
+}
+
+async function handleSavedGameHistoryGet(request, response, sessionId) {
+    const userId = await authenticateRequest(request, response);
+    if (!userId) return;
+    if (isGuestUserId(userId)) {
+        jsonResponse(response, 200, { guest: true });
+        return;
+    }
+    try {
+        const record = await loadGameSessionRecord(request, sessionId, userId);
+        if (!record) {
+            jsonResponse(response, 404, { error: 'That game history could not be found.' });
+            return;
+        }
+        jsonResponse(response, 200, record);
+    } catch (error) {
+        jsonResponse(response, 503, { error: error.message || 'Unable to load game history.' });
     }
 }
 
@@ -1341,8 +1400,16 @@ async function handleGameCheck(request, response) {
             entry.historyEntry.attempts.push(attempt);
         }
         entry.checkInProgress = false;
+        let historySaveError = '';
         if (session.lives === 0) {
             session.finishedAt = new Date().toISOString();
+            if (!isGuestUserId(userId)) {
+                try {
+                    await saveGameSessionRecord(request, session, body.sessionId);
+                } catch (error) {
+                    historySaveError = error.message || 'Unable to save game history to your account.';
+                }
+            }
         }
         jsonResponse(response, 200, {
             correct: result.correct,
@@ -1352,6 +1419,8 @@ async function handleGameCheck(request, response) {
             totalPoints: isGuestUserId(userId) ? session.score : totalPoints,
             finishedAt: session.finishedAt,
             history: session.lives === 0 ? session.history : undefined,
+            historySaved: session.recordSaved === true,
+            historySaveError,
             ...gameState(session),
         });
     } catch (error) {
@@ -1949,6 +2018,24 @@ function handleRequest(request, response) {
                     error: 'The leaderboard is temporarily unavailable. Please try again.',
                 });
             }
+        });
+        return;
+    }
+    if (url.pathname === '/api/game/history' && request.method === 'GET') {
+        handleGameHistoryList(request, response).catch(() => {
+            if (!response.headersSent) jsonResponse(response, 503, { error: 'Unable to load game history.' });
+        });
+        return;
+    }
+    const savedGameHistoryMatch = url.pathname.match(/^\/api\/game\/history\/([^/]+)$/);
+    if (savedGameHistoryMatch) {
+        if (request.method !== 'GET') {
+            response.writeHead(405, { Allow: 'GET' });
+            response.end();
+            return;
+        }
+        handleSavedGameHistoryGet(request, response, savedGameHistoryMatch[1]).catch(() => {
+            if (!response.headersSent) jsonResponse(response, 503, { error: 'Unable to load game history.' });
         });
         return;
     }

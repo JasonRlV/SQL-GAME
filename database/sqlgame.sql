@@ -118,6 +118,35 @@ create table if not exists public.player_points (
     updated_at timestamptz not null default now()
 );
 
+create table if not exists public.game_sessions (
+    id uuid primary key,
+    user_id uuid not null references auth.users (id) on delete cascade,
+    difficulty text not null check (difficulty in ('easy', 'normal', 'hard')),
+    final_score integer not null check (final_score >= 0),
+    history jsonb not null default '[]'::jsonb,
+    finished_at timestamptz not null default now()
+);
+
+create index if not exists game_sessions_user_finished_idx
+    on public.game_sessions (user_id, finished_at desc);
+
+alter table public.game_sessions enable row level security;
+revoke all on public.game_sessions from anon, authenticated;
+grant select, insert on public.game_sessions to authenticated;
+grant select, insert on public.game_sessions to service_role;
+
+drop policy if exists "Players can read their own game sessions" on public.game_sessions;
+create policy "Players can read their own game sessions"
+    on public.game_sessions for select
+    to authenticated
+    using (auth.uid() = user_id);
+
+drop policy if exists "Players can insert their own game sessions" on public.game_sessions;
+create policy "Players can insert their own game sessions"
+    on public.game_sessions for insert
+    to authenticated
+    with check (auth.uid() = user_id);
+
 create table if not exists public.player_point_transactions (
     user_id uuid not null references auth.users (id) on delete cascade,
     event_key text not null check (char_length(event_key) between 1 and 80),
